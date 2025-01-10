@@ -1,0 +1,29 @@
+mv .\steamdeck-recovery*.img .\steamdeck-recovery.img
+& "$ENV:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" convertfromraw --format VDI .\steamdeck-recovery.img .\steamdeck-recovery.vdi
+sudo fdisk -l
+nano ./tools/repair_device.sh
+sudo ./tools/repair_device.sh all
+sudo steamos-chroot --disk /dev/sda --partset A
+steamos-readonly disable
+passwd
+echo -e '[Autologin]\nSession=plasma.desktop' > /etc/sddm.conf.d/zz-steamos-desktopmode.conf
+steamos-readonly enable
+exit
+sudo steamos-chroot --disk /dev/sda --partset B
+steamos-readonly disable
+passwd
+echo -e '[Autologin]\nSession=plasma.desktop' > /etc/sddm.conf.d/zz-steamos-desktopmode.conf
+steamos-readonly enable
+exit
+sudo shutdown now
+passwd
+steamos-readonly disable
+sudo rm /etc/pacman.d/gnupg -R
+sudo pacman-key --init
+sudo pacman-key --populate archlinux
+sudo nano /etc/pacman.conf
+
+sudo pacman -Syu
+sudo ./VBoxLinuxAdditions.run
+sudo /sbin/rcvboxadd quicksetup all
+sudo reboot now
